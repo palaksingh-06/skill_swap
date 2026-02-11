@@ -29,10 +29,19 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("join-room", (roomId) => {
-    socket.join(roomId);
-    socket.to(roomId).emit("user-joined", socket.id);
-  });
+ socket.on("join-room", (roomId) => {
+  const clients = io.sockets.adapter.rooms.get(roomId);
+  const numClients = clients ? clients.size : 0;
+
+  socket.join(roomId);
+
+  if (numClients === 0) {
+    socket.emit("you-are-first");
+  } else {
+    socket.emit("you-are-second");
+    socket.to(roomId).emit("second-user-joined");
+  }
+});
 
   socket.on("offer", (data) => {
     socket.to(data.roomId).emit("offer", data.offer);
@@ -80,6 +89,7 @@ app.use("/api/match", matchRoute);
 
 /* ------------------ SERVER ------------------ */
 const PORT = 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
