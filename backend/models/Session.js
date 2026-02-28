@@ -8,6 +8,7 @@
 // });
 
 // module.exports = mongoose.model("Session", sessionSchema);
+
 const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema(
@@ -27,19 +28,20 @@ const sessionSchema = new mongoose.Schema(
       required: true,
     },
 
-    date: {
-      type: String,
-      default: "Not scheduled",
-    },
-    time: {
-      type: String,
-      default: "Not scheduled",
-    },
+ date: { type: String, default: null },
+    time: { type: String, default: null },
+    
+    notes: { type: String, default: null },
+
+videoCallLink: {
+  type: String,
+},
+
 
     status: {
       type: String,
-      enum: ["upcoming", "completed"],
-      default: "upcoming",
+      enum: ["pending", "scheduled", "completed", "cancelled"],
+      default: "pending",
     },
   },
   { timestamps: true }
