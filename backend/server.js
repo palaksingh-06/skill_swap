@@ -1,3 +1,99 @@
+// const express = require("express");
+// const cors = require("cors");
+// require("dotenv").config({ override: true });
+// const messageRoutes = require("./routes/messageRoutes");
+
+// const connectDB = require("./config/db");
+// const passport = require("./config/passport");
+
+// const authRoutes = require("./routes/authRoutes");
+// const userRoutes = require("./routes/userRoutes");
+// const requestRoutes = require("./routes/requestRoutes");
+// const sessionRoutes = require("./routes/sessionRoutes");
+// const skillRoutes = require("./routes/skillRoutes");
+// const publicRoutes = require("./routes/publicRoutes");
+// const skillSwapRoutes = require("./routes/skillSwapRoutes");
+// const matchRoute = require("./routes/match");
+// const http = require("http");
+// const { Server } = require("socket.io");
+
+
+// const app = express();
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST"]
+//   }
+// });
+// io.on("connection", (socket) => {
+//   console.log("User connected:", socket.id);
+
+//  socket.on("join-room", (roomId) => {
+//   const clients = io.sockets.adapter.rooms.get(roomId);
+//   const numClients = clients ? clients.size : 0;
+
+//   socket.join(roomId);
+
+//   if (numClients === 0) {
+//     socket.emit("you-are-first");
+//   } else {
+//     socket.emit("you-are-second");
+//     socket.to(roomId).emit("second-user-joined");
+//   }
+// });
+
+//   socket.on("offer", (data) => {
+//     socket.to(data.roomId).emit("offer", data.offer);
+//   });
+
+//   socket.on("answer", (data) => {
+//     socket.to(data.roomId).emit("answer", data.answer);
+//   });
+
+//   socket.on("ice-candidate", (data) => {
+//     socket.to(data.roomId).emit("ice-candidate", data.candidate);
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("User disconnected:", socket.id);
+//   });
+// });
+
+// /* ------------------ MIDDLEWARE ------------------ */
+// app.use(cors());
+// app.use(express.json());
+
+// app.use(passport.initialize());
+
+// /* ------------------ DATABASE ------------------ */
+// connectDB();
+
+// /* ------------------ TEST ------------------ */
+// app.get("/", (req, res) => {
+//   res.send("SkillSwap Backend Running");
+// });
+
+// /* ------------------ ROUTES ------------------ */
+// app.use("/api/auth", authRoutes);
+// app.use("/api/user", userRoutes);
+// app.use("/api/requests", requestRoutes);
+// app.use("/api/sessions", sessionRoutes);
+// app.use("/api/skills", skillRoutes);
+// app.use("/api/public", publicRoutes);
+// app.use("/api/swaps", skillSwapRoutes);
+// app.use("/api/requests", requestRoutes);
+// app.use("/api/messages", messageRoutes);
+// app.use("/api/match", matchRoute);
+
+
+// /* ------------------ SERVER ------------------ */
+// const PORT = 5000;
+// server.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+
+
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config({ override: true });
@@ -22,26 +118,26 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
- socket.on("join-room", (roomId) => {
-  const clients = io.sockets.adapter.rooms.get(roomId);
-  const numClients = clients ? clients.size : 0;
+  socket.on("join-room", (roomId) => {
+    const clients = io.sockets.adapter.rooms.get(roomId);
+    const numClients = clients ? clients.size : 0;
 
-  socket.join(roomId);
+    socket.join(roomId);
 
-  if (numClients === 0) {
-    socket.emit("you-are-first");
-  } else {
-    socket.emit("you-are-second");
-    socket.to(roomId).emit("second-user-joined");
-  }
-});
+    if (numClients === 0) {
+      socket.emit("you-are-first");
+    } else {
+      socket.emit("you-are-second");
+      socket.to(roomId).emit("second-user-joined");
+    }
+  });
 
   socket.on("offer", (data) => {
     socket.to(data.roomId).emit("offer", data.offer);
@@ -92,4 +188,3 @@ const PORT = 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
