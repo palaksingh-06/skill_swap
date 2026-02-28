@@ -14,7 +14,7 @@ const skillRoutes = require("./routes/skillRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const skillSwapRoutes = require("./routes/skillSwapRoutes");
 const matchRoute = require("./routes/match");
-
+const aiRoutes = require("./routes/ai");
 
 const app = express();
 
@@ -42,7 +42,7 @@ app.use("/api/swaps", skillSwapRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/match", matchRoute);
-
+app.use("/api/ai", aiRoutes);
 
 /* ------------------ SERVER ------------------ */
 const PORT = 5000;
