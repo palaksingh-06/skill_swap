@@ -9,6 +9,7 @@ const Search = () => {
   const [skillsData, setSkillsData] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [hiddenMentors, setHiddenMentors] = useState([]);
   const navigate = useNavigate();
 
 const openProfile = async (name) => {
@@ -68,15 +69,24 @@ const openProfile = async (name) => {
 
   /* ---------------- SEARCH FILTER ---------------- */
   const filteredMentors = useMemo(() => {
-    if (!search.trim()) return mentors;
+    if (!search.trim())
+  return mentors.filter(
+    (mentor) => !hiddenMentors.includes(mentor.id)
+  );
 
     const query = search.toLowerCase();
-    return mentors.filter((mentor) =>
-      mentor.skills.some((skill) =>
-        skill.toLowerCase().includes(query)
-      )
-    );
-  }, [search, mentors]);
+    return mentors
+  .filter((mentor) =>
+    mentor.skills.some((skill) =>
+      skill.toLowerCase().includes(query)
+    )
+  )
+  .filter((mentor) => !hiddenMentors.includes(mentor.id));
+  }, [search, mentors, hiddenMentors]);
+
+  const handleRemove = (id) => {
+  setHiddenMentors((prev) => [...prev, id]);
+  };
 
   if (loading) {
     return (
@@ -145,12 +155,23 @@ const openProfile = async (name) => {
           {filteredMentors.map((mentor) => (
             <div
   key={mentor.id}
+<<<<<<< HEAD
   className={`rounded-3xl p-6 transition-all duration-300 ${
+=======
+  className={`relative rounded-3xl p-6 transition-all duration-300 ${
+>>>>>>> 4557da83e028d6110d23849f5b876ed64870f37e
     darkMode
       ? "bg-slate-800 border border-slate-700 shadow-md hover:shadow-xl hover:-translate-y-1"
       : "bg-white border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1"
   }`}
 >
+  <button
+    onClick={() => handleRemove(mentor.id)}
+    className="absolute top-3 right-4 text-gray-400 hover:text-red-500 text-lg font-bold"
+  >
+    ×
+  </button>
+
 
              <h3
   className={`text-xl font-semibold mb-3 ${
