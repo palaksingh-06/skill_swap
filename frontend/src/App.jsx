@@ -224,12 +224,10 @@ import VideoCall from "./pages/VideoCall";
 import Messages from "./pages/Messages";
 
 
-import Navbar from "./components/Navbar";
 
-import ProtectedRoute from "./components/ProtectedRoute";
 
-import { DarkModeContext } from "./context/DarkModeContext";
-import { AuthContext } from "./context/AuthContext";
+
+
 import ScheduleSession from "./pages/ScheduleSession";
 
 

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // import { Link, useNavigate } from "react-router-dom";
 // import { useContext } from "react";
 // import { AuthContext } from "../context/AuthContext";
@@ -114,8 +113,6 @@
 // export default Navbar;
 
 
-=======
->>>>>>> 4557da83e028d6110d23849f5b876ed64870f37e
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";

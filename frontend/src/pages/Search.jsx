@@ -155,11 +155,7 @@ const openProfile = async (name) => {
           {filteredMentors.map((mentor) => (
             <div
   key={mentor.id}
-<<<<<<< HEAD
-  className={`rounded-3xl p-6 transition-all duration-300 ${
-=======
   className={`relative rounded-3xl p-6 transition-all duration-300 ${
->>>>>>> 4557da83e028d6110d23849f5b876ed64870f37e
     darkMode
       ? "bg-slate-800 border border-slate-700 shadow-md hover:shadow-xl hover:-translate-y-1"
       : "bg-white border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1"
