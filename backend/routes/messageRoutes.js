@@ -1,20 +1,9 @@
 const express = require("express");
-const {
-  sendMessage,
-  getMessages,
-} = require("../controllers/messageController");
-const auth = require("../middleware/authMiddleware");
+const protectRoute = require("../middleware/authMiddleware");
+const { getStreamToken } = require("../controllers/messageController");
 
 const router = express.Router();
 
-/* ------------------------
-   SEND MESSAGE
-------------------------- */
-router.post("/send", auth, sendMessage);
-
-/* ------------------------
-   GET CHAT WITH USER
-------------------------- */
-router.get("/:userId", auth, getMessages);
+router.get("/token", protectRoute, getStreamToken);
 
 module.exports = router;

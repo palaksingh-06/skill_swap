@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Skills from "./pages/Skills";
-import Messages from "./pages/Messages";
+
 import EditProfile from "./pages/EditProfile";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -21,15 +21,17 @@ import ForgotPassword from "./pages/ForgotPassword";
 import SkillCategory from "./pages/SkillCategory";
 import SkillMatch from "./pages/SkillMatch";
 import VideoCall from "./pages/VideoCall";
+import Messages from "./pages/Messages";
 
 
 import Navbar from "./components/Navbar";
-import SkillSwap3D from "./components/SkillSwap3D";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ScheduleSession from "./pages/ScheduleSession";
+
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
@@ -183,9 +185,10 @@ const App = () => {
     </ProtectedRoute>
   }
 />
+
 <Route path="/video-call/:roomId" element={<VideoCall />} />
 
-
+ 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

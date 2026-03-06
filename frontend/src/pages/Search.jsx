@@ -144,7 +144,7 @@ const openProfile = async (name) => {
 
           {filteredMentors.map((mentor) => (
             <div
-  key={mentor.name}
+  key={mentor.id}
   className={`rounded-3xl p-6 transition-all duration-300 ${
     darkMode
       ? "bg-slate-800 border border-slate-700 shadow-md hover:shadow-xl hover:-translate-y-1"
@@ -189,6 +189,12 @@ onClick={() => navigate(`/profile/${mentor.id}`)}
   className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition"
 >
   View Details
+</button>
+<button
+  onClick={() => navigate(`/messages/${mentor.id}`)}
+  className="mt-2 w-full py-2 rounded-xl bg-teal-500 text-white hover:bg-teal-600 transition"
+>
+  Message
 </button>
 
 

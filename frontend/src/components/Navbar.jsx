@@ -111,6 +111,8 @@
 // };
 
 // export default Navbar;
+
+
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -118,9 +120,10 @@ import { DarkModeContext } from "../context/DarkModeContext";
 import MoonIcon from "../assets/imageofmoon.png";
 import SunIcon from "../assets/imageofsun.png";
 
-const Navbar = ({ open3D }) => {
+const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
+
   const navigate = useNavigate();
 
   return (
@@ -129,20 +132,15 @@ const Navbar = ({ open3D }) => {
         darkMode ? "bg-slate-900 text-white" : "bg-white text-gray-800"
       }`}
     >
-      {/* 🔥 LOGO (3D Trigger) */}
-      <div
-        onClick={open3D}
-        className="flex items-center gap-2 cursor-pointer select-none"
-      >
+      {/* LOGO */}
+      <Link to="/" className="flex items-center gap-2">
         <span className="text-3xl font-extrabold text-teal-500">S</span>
-        <span className="text-2xl font-extrabold tracking-wide">
-          SkillSwap
-        </span>
-      </div>
+        <span className="text-2xl font-extrabold tracking-wide">SkillSwap</span>
+      </Link>
 
       {/* RIGHT SIDE */}
       <div className="flex items-center gap-6 text-sm font-semibold">
-        {/* DARK MODE */}
+        {/* DARK MODE TOGGLE */}
         <button
           onClick={toggleDarkMode}
           className="w-8 h-8 rounded-full overflow-hidden"
@@ -164,15 +162,16 @@ const Navbar = ({ open3D }) => {
         </Link>
 
         {user && (
-          <Link
-            to="/matches"
-            className={`hover:text-teal-600 transition ${
-              darkMode ? "text-white" : "text-gray-700"
-            }`}
-          >
-            Skill Matches
-          </Link>
-        )}
+  <Link
+     to="/matches"
+    className={`hover:text-teal-600 transition ${
+      darkMode ? "text-white" : "text-gray-700"
+    }`}
+  >
+    Skill Matches
+  </Link>
+)}
+
 
         {user ? (
           <>
@@ -185,6 +184,7 @@ const Navbar = ({ open3D }) => {
               Profile
             </Link>
 
+            {/* ✅ SETTINGS BUTTON */}
             <Link
               to="/settings"
               className={`hover:text-teal-600 transition ${
