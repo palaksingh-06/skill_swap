@@ -224,6 +224,7 @@ const skillSwapRoutes = require("./routes/skillSwapRoutes");
 const matchRoutes = require("./routes/match");
 const messageRoutes = require("./routes/messageRoutes"); // messages routes
 const chatRoutes = require("./routes/chat"); // chat routes
+const videoRoutes = require("./routes/videoRoutes"); //Video call routes
 // HTTP & Socket.io
 const http = require("http");
 const { Server } = require("socket.io");
@@ -301,6 +302,9 @@ app.use("/api/match", matchRoutes);
 app.use("/api/chats", chatRoutes); // For creating/getting chats
 app.use("/api/messages", messageRoutes); // For sending/getting messages
 
+
+// ✅ Video Call
+app.use("/api/video", videoRoutes);
 // ------------------ SERVER ------------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

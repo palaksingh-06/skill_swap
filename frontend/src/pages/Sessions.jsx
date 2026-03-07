@@ -3,11 +3,11 @@ import axios from "axios";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { AuthContext } from "../context/AuthContext";
 import ScheduleModal from "../components/ScheduleModal";
-
+import { useNavigate } from "react-router-dom";
 const Sessions = () => {
   const { darkMode } = useContext(DarkModeContext);
   const { user } = useContext(AuthContext);
-
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState(null);
@@ -54,6 +54,11 @@ const Sessions = () => {
       alert("Failed to delete session");
     }
   };
+
+  //Joining video call
+  const handleJoinCall = (sessionId) => {
+  navigate(`/video-call/${sessionId}`);
+};
 
   return (
     <div
@@ -135,18 +140,12 @@ const Sessions = () => {
                       </button>
                     )}
 
-                    {/* ✅ JOIN VIDEO CALL */}
-                    {session.videoCallLink && (
-                      <a
-                        href={session.videoCallLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg"
-                      >
-                        Join Video Call
-                      </a>
-                    )}
-
+                    <button
+                onClick={() => handleJoinCall(session._id)}
+                    className="bg-green-600 text-white px-3 py-1 rounded"
+              >
+                    Join Video Call
+                  </button>
                     {/* Reschedule */}
                     {session.date && (
                       <button
