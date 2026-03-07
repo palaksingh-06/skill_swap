@@ -198,7 +198,7 @@
 import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Skills from "./pages/Skills";
-
+import "@stream-io/video-react-sdk/dist/css/styles.css";
 import EditProfile from "./pages/EditProfile";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -277,7 +277,6 @@ const App = () => {
           }
         />
 
-        <Route path="/video-call/:roomId" element={<VideoCall />} />
 
         <Route path="/profile/:id" element={<PublicProfile />} />
         <Route path="/matches" element={<SkillMatch />} />
