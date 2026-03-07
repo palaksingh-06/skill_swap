@@ -35,10 +35,15 @@ const getUserChats = async (req, res) => {
     const userID = req.user._id;
     const chats = await Chat.find({
       $or: [{ senderID: userID }, { receiverID: userID }],
-    });
+    }).populate("senderID", "name avatar").populate("receiverID", "name avatar");
     res.status(200).json(chats);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+module.exports = {
+  createOrGetChat,
+  getUserChats,
 };

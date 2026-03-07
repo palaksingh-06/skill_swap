@@ -222,8 +222,8 @@ const skillRoutes = require("./routes/skillRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const skillSwapRoutes = require("./routes/skillSwapRoutes");
 const matchRoutes = require("./routes/match");
-const messageRoutes = require("./routes/messageRoutes"); // chat & messages routes
-
+const messageRoutes = require("./routes/messageRoutes"); // messages routes
+const chatRoutes = require("./routes/chat"); // chat routes
 // HTTP & Socket.io
 const http = require("http");
 const { Server } = require("socket.io");
@@ -298,7 +298,8 @@ app.use("/api/swaps", skillSwapRoutes);
 app.use("/api/match", matchRoutes);
 
 // ✅ Chat & Messages
-app.use("/api/chats", messageRoutes); // For creating/getting chats & messages
+app.use("/api/chats", chatRoutes); // For creating/getting chats
+app.use("/api/messages", messageRoutes); // For sending/getting messages
 
 // ------------------ SERVER ------------------
 const PORT = process.env.PORT || 5000;

@@ -24,10 +24,20 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "chatID and message are required" });
     }
 
+    const Chat = require("../models/chat.js");
+    const chat = await Chat.findById(chatID);
+    if (!chat) return res.status(404).json({ message: "Chat not found" });
+
+    // Determine receiverID based on chat participants
+    const receiverID = chat.senderID.toString() === req.user._id.toString()
+      ? chat.receiverID
+      : chat.senderID;
+
     const newMessage = await ChatMessage.create({
       chatID,
       message,
       senderID: req.user._id, // must come from auth middleware
+      receiverID
     });
 
     res.status(201).json(newMessage);

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { socket } from "../socket";
 import ChatList from "./ChatList";
-import MessageBox from "./MessageBox";
+import MessageBox from "./Messages";
 import { AuthContext } from "../context/AuthContext";
 
 const ChatPage = () => {
@@ -13,14 +13,28 @@ const ChatPage = () => {
 
   // Fetch all chats for this user
   const fetchChats = async () => {
-    const res = await axios.get(`/api/messages/chats/${user._id}`);
-    setChats(res.data);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:5000/api/chats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setChats(res.data);
+    } catch (error) {
+      console.error("Failed to fetch chats", error);
+    }
   };
 
   // Fetch messages for selected chat
   const fetchMessages = async (chatID) => {
-    const res = await axios.get(`/api/messages/${chatID}`);
-    setMessages(res.data);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:5000/api/messages/${chatID}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(res.data);
+    } catch (error) {
+      console.error("Failed to fetch messages", error);
+    }
   };
 
   useEffect(() => {
@@ -45,7 +59,7 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-screen">
-      <ChatList chats={chats} onSelectChat={handleSelectChat} />
+      <ChatList chats={chats} onSelectChat={handleSelectChat} currentUser={user} />
       {selectedChat && <MessageBox messages={messages} chat={selectedChat} />}
     </div>
   );

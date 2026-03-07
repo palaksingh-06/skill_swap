@@ -85,9 +85,12 @@ const MessageBox = ({ messages = [], chat }) => {
     if (!newMessage) return;
 
     try {
-      const res = await axios.post("/api/messages", {
+      const token = localStorage.getItem("token");
+      const res = await axios.post("http://localhost:5000/api/messages", {
         chatID: chat._id,
         message: newMessage,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       socket.emit("new-message", res.data); // emit to socket
@@ -103,9 +106,8 @@ const MessageBox = ({ messages = [], chat }) => {
         {messages.map((msg) => (
           <div
             key={msg._id}
-            className={`my-1 p-2 rounded ${
-              msg.senderID === user._id ? "bg-blue-200 self-end" : "bg-gray-200 self-start"
-            }`}
+            className={`my-1 p-2 rounded ${msg.senderID === user._id ? "bg-blue-200 self-end" : "bg-gray-200 self-start"
+              }`}
           >
             {msg.message}
           </div>
