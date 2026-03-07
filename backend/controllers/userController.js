@@ -1,52 +1,175 @@
 const User = require("../models/User");
 const Request = require("../models/Request");
 const Session = require("../models/Session");
+const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
+const mongoose = require("mongoose");
 
-// ✅ UPDATE PROFILE
+/* ------------------------------------
+   Helper: Convert skill names to IDs
+------------------------------------ */
+async function convertToSkillIds(skillNames = []) {
+  const ids = [];
+
+  for (let raw of skillNames) {
+    const name = raw.trim().toLowerCase();
+    if (!name) continue;
+
+    let skill = await Skill.findOne({ name });
+
+    if (!skill) {
+      try {
+        skill = await Skill.create({ name });
+      } catch (err) {
+        if (err.code === 11000) {
+          skill = await Skill.findOne({ name });
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    ids.push(skill._id);
+  }
+
+  return ids;
+}
+
+/* ------------------------------------
+   UPDATE PROFILE (REPLACE SKILLS ✅)
+------------------------------------ */
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, skillsTeach, skillsLearn } = req.body;
+    let { name, skillsTeach = [], skillsLearn = [] } = req.body;
+
+    const normalize = (val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string")
+        return val.split(",").map((s) => s.trim());
+      return [];
+    };
+
+    skillsTeach = normalize(skillsTeach);
+    skillsLearn = normalize(skillsLearn);
+
+    const teachIds = await convertToSkillIds(skillsTeach);
+    const learnIds = await convertToSkillIds(skillsLearn);
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, skillsTeach, skillsLearn },
+      {
+        name,
+        skillsTeach: teachIds,   // ✅ REPLACE
+        skillsLearn: learnIds,   // ✅ REPLACE
+      },
       { new: true }
-    );
+    )
+      .populate("skillsTeach")
+      .populate("skillsLearn");
 
     res.json({ user });
   } catch (err) {
-    console.error(err);
+    console.error("UPDATE PROFILE ERROR:", err);
     res.status(500).json({ msg: "Profile update failed" });
   }
 };
-
-// ✅ SEARCH USERS
-exports.searchUsers = async (req, res) => {
+/* ------------------------------------
+   UPDATE PUBLIC PROFILE
+------------------------------------ */
+exports.updatePublicProfile = async (req, res) => {
   try {
-    const { skill } = req.query;
+    const { tagline, bio, demoVideo } = req.body;
 
-    const users = await User.find({
-      skillsTeach: { $regex: skill, $options: "i" },
-    }).select("name skillsTeach skillsLearn");
+    const user = await User.findByIdAndUpdate(
+      req.user.id, // comes from auth middleware
+      {
+        tagline,
+        bio,
+        demoVideo,
+      },
+      { new: true }
+    );
 
-    res.json({ users });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json({
+      msg: "Public profile updated successfully",
+      user,
+    });
   } catch (err) {
-    res.status(500).json({ msg: "Search failed" });
+    console.error("UPDATE PUBLIC PROFILE ERROR:", err);
+    res.status(500).json({ msg: "Failed to update public profile" });
   }
 };
 
-// ✅ GET MY PROFILE
+/* ------------------------------------
+   GET ALL SKILLS (Browse Skills)
+------------------------------------ */
+exports.getAllSkills = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("name skillsTeach")
+      .lean();
+
+    const skillMap = {};
+
+    users.forEach((user) => {
+      if (!Array.isArray(user.skillsTeach)) return;
+
+      user.skillsTeach.forEach((skillId) => {
+        if (!mongoose.Types.ObjectId.isValid(skillId)) return;
+
+        const id = skillId.toString();
+
+        if (!skillMap[id]) {
+          skillMap[id] = { mentors: [] };
+        }
+
+        skillMap[id].mentors.push({
+  id: user._id,
+  name: user.name
+});
+
+      });
+    });
+
+    const skillDocs = await Skill.find({
+      _id: { $in: Object.keys(skillMap) },
+    });
+
+    const result = skillDocs.map((skill) => ({
+      _id: skill._id,
+      name: skill.name,
+      mentors: skillMap[skill._id.toString()]?.mentors || [],
+    }));
+
+    res.json({ skills: result });
+  } catch (err) {
+    console.error("GET ALL SKILLS ERROR:", err);
+    res.status(500).json({ msg: "Failed to load skills" });
+  }
+};
+
+/* ------------------------------------
+   GET MY PROFILE
+------------------------------------ */
 exports.getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id)
+      .populate("skillsTeach")
+      .populate("skillsLearn");
+
     res.json({ user });
   } catch (err) {
     res.status(500).json({ msg: "Failed to load profile" });
   }
 };
 
-// ✅ DASHBOARD STATS
+/* ------------------------------------
+   DASHBOARD STATS
+------------------------------------ */
 exports.getStats = async (req, res) => {
   try {
     const sent = await Request.countDocuments({ fromUser: req.user.id });
@@ -65,8 +188,30 @@ exports.getStats = async (req, res) => {
     res.status(500).json({ msg: "Stats failed" });
   }
 };
+// GET PUBLIC PROFILE BY ID
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("name tagline bio demoVideo skillsTeach skillsLearn") // ✅ include demoVideo
+      .populate("skillsTeach", "name")
+      .populate("skillsLearn", "name");
 
-// ✅ UPLOAD AVATAR
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json(user); // frontend will get demoVideo
+  } catch (err) {
+    console.error("PUBLIC PROFILE ERROR:", err);
+    res.status(500).json({ msg: "Failed to load public profile" });
+  }
+};
+
+
+
+/* ------------------------------------
+   UPLOAD AVATAR
+------------------------------------ */
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
