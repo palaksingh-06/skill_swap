@@ -78,7 +78,19 @@ exports.updateProfile = async (req, res) => {
 ------------------------------------ */
 exports.updatePublicProfile = async (req, res) => {
   try {
-    const { tagline, bio, demoVideo } = req.body;
+    const {
+      tagline,
+      bio,
+      demoVideo,
+      username,
+      skillLevel,
+      yearsOfExperience,
+      linkedin,
+      portfolio,
+      education,
+      skillsOffered,
+      skillTags
+    } = req.body;
 
     const user = await User.findByIdAndUpdate(
       req.user.id, // comes from auth middleware
@@ -86,6 +98,14 @@ exports.updatePublicProfile = async (req, res) => {
         tagline,
         bio,
         demoVideo,
+        username,
+        skillLevel,
+        yearsOfExperience,
+        linkedin,
+        portfolio,
+        education,
+        skillsOffered,
+        skillTags
       },
       { new: true }
     );
@@ -192,7 +212,9 @@ exports.getStats = async (req, res) => {
 exports.getPublicProfile = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select("name tagline bio demoVideo skillsTeach skillsLearn") // ✅ include demoVideo
+      .select(
+        "name tagline bio demoVideo skillsTeach skillsLearn skillLevel yearsOfExperience education linkedin portfolio skillsOffered skillTags"
+      )
       .populate("skillsTeach", "name")
       .populate("skillsLearn", "name");
 
@@ -200,7 +222,7 @@ exports.getPublicProfile = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    res.json(user); // frontend will get demoVideo
+    res.json(user);
   } catch (err) {
     console.error("PUBLIC PROFILE ERROR:", err);
     res.status(500).json({ msg: "Failed to load public profile" });

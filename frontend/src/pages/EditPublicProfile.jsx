@@ -6,7 +6,7 @@ import { DarkModeContext } from "../context/DarkModeContext";
 const PublicProfile = () => {
   const { user, setUser } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -14,23 +14,56 @@ const PublicProfile = () => {
   const [bio, setBio] = useState("");
   const [demoVideo, setDemoVideo] = useState("");
 
+  const [username, setUsername] = useState("");
+  const [skillLevel, setSkillLevel] = useState("");
+  const [experience, setExperience] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [portfolio, setPortfolio] = useState("");
+  const [education, setEducation] = useState("");
+  const [skillsOffered, setSkillsOffered] = useState("");
+  const [skillTags, setSkillTags] = useState("");
+
   useEffect(() => {
     if (user) {
       setTagline(user.tagline || "");
       setBio(user.bio || "");
       setDemoVideo(user.demoVideo || "");
+
+      setUsername(user.username || "");
+      setSkillLevel(user.skillLevel || "");
+      setExperience(user.yearsOfExperience || "");
+      setLinkedin(user.linkedin || "");
+      setPortfolio(user.portfolio || "");
+      setEducation(user.education || "");
+
+      setSkillsOffered(user.skillsOffered?.join(", ") || "");
+      setSkillTags(user.skillTags?.join(", ") || "");
+
       setLoading(false);
     }
   }, [user]);
 
   const handleSave = async () => {
     setSaving(true);
+
     try {
       const token = localStorage.getItem("token");
 
       const res = await axios.put(
         "http://localhost:5000/api/user/public-profile",
-        { tagline, bio, demoVideo },
+        {
+          tagline,
+          bio,
+          demoVideo,
+          username,
+          skillLevel,
+          yearsOfExperience: experience,
+          linkedin,
+          portfolio,
+          education,
+          skillsOffered: skillsOffered.split(",").map((s) => s.trim()),
+          skillTags: skillTags.split(",").map((s) => s.trim()),
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,47 +100,160 @@ const PublicProfile = () => {
       >
         {/* HEADER */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-2">
-            Edit Public Profile
-          </h1>
+          <h1 className="text-3xl font-bold mb-2">Edit Public Profile</h1>
           <p className="text-slate-500">
             Update your information to stand out to the community.
           </p>
         </div>
 
+        {/* MENTOR DETAILS */}
+<div className="mt-6">
+  <h2 className="text-lg font-semibold mb-4">Mentor Details</h2>
+
+  <div className="grid md:grid-cols-2 gap-6">
+
+    {/* Skill Level */}
+    <div>
+      <label className="block font-medium mb-2">Skill Level</label>
+      <input
+        type="text"
+        placeholder="Beginner / Intermediate / Expert"
+        value={skillLevel}
+        onChange={(e) => setSkillLevel(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+    {/* Years of Experience */}
+    <div>
+      <label className="block font-medium mb-2">Years of Experience</label>
+      <input
+        type="number"
+        placeholder="3"
+        value={experience}
+        onChange={(e) => setExperience(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+    {/* Education */}
+    <div>
+      <label className="block font-medium mb-2">Education</label>
+      <input
+        type="text"
+        placeholder="B.Tech Computer Science"
+        value={education}
+        onChange={(e) => setEducation(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+    {/* LinkedIn */}
+    <div>
+      <label className="block font-medium mb-2">LinkedIn</label>
+      <input
+        type="url"
+        placeholder="https://linkedin.com/in/yourprofile"
+        value={linkedin}
+        onChange={(e) => setLinkedin(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+    {/* Portfolio */}
+    <div>
+      <label className="block font-medium mb-2">Portfolio</label>
+      <input
+        type="url"
+        placeholder="https://yourportfolio.com"
+        value={portfolio}
+        onChange={(e) => setPortfolio(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+    {/* Skills Offered */}
+    <div>
+      <label className="block font-medium mb-2">
+        Skills Offered (comma separated)
+      </label>
+      <input
+        type="text"
+        placeholder="React, Python, UI Design"
+        value={skillsOffered}
+        onChange={(e) => setSkillsOffered(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+    {/* Skill Categories */}
+    <div>
+      <label className="block font-medium mb-2">
+        Skill Categories
+      </label>
+      <input
+        type="text"
+        placeholder="Programming, Design"
+        value={skillTags}
+        onChange={(e) => setSkillTags(e.target.value)}
+        className={`w-full rounded-xl px-4 py-3 border ${
+          darkMode
+            ? "bg-slate-700 border-slate-600"
+            : "bg-slate-50 border-slate-200"
+        }`}
+      />
+    </div>
+
+  </div>
+</div>
         {/* TAGLINE */}
         <div className="mb-8">
-          <label className="block font-semibold mb-2">
-            Tagline
-          </label>
+          <label className="block font-semibold mb-2">Tagline</label>
           <input
             type="text"
-            placeholder="Helping learners master web development"
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
-            className={`w-full rounded-xl px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+            className={`w-full rounded-xl px-4 py-3 border ${
               darkMode
-                ? "bg-slate-700 border-slate-600 text-white"
+                ? "bg-slate-700 border-slate-600"
                 : "bg-slate-50 border-slate-200"
             }`}
           />
-          <p className="text-sm text-slate-500 mt-2">
-            Short one-line description shown on your public profile
-          </p>
         </div>
 
         {/* BIO */}
         <div className="mb-8">
-          <label className="block font-semibold mb-2">
-            Bio
-          </label>
+          <label className="block font-semibold mb-2">Bio</label>
           <textarea
-            placeholder="Tell learners about your experience, teaching style, and skills..."
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className={`w-full rounded-xl px-4 py-3 h-36 border resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+            className={`w-full rounded-xl px-4 py-3 h-36 border ${
               darkMode
-                ? "bg-slate-700 border-slate-600 text-white"
+                ? "bg-slate-700 border-slate-600"
                 : "bg-slate-50 border-slate-200"
             }`}
           />
@@ -115,30 +261,24 @@ const PublicProfile = () => {
 
         {/* DEMO VIDEO */}
         <div className="mb-10">
-          <label className="block font-semibold mb-2">
-            Demo Video Link
-          </label>
+          <label className="block font-semibold mb-2">Demo Video Link</label>
           <input
-    type="url"
-    placeholder="https://youtube.com/..."
-    value={demoVideo}
-    onChange={(e) => setDemoVideo(e.target.value)}
-    className={`w-full rounded-xl px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-teal-400 ${
-      darkMode
-        ? "bg-slate-700 border-slate-600 text-white"
-        : "bg-slate-50 border-slate-200"
-    }`}
-  />
-          <p className="text-sm text-slate-500 mt-2">
-            Optional – link to a demo teaching video
-          </p>
+            type="url"
+            value={demoVideo}
+            onChange={(e) => setDemoVideo(e.target.value)}
+            className={`w-full rounded-xl px-4 py-3 border ${
+              darkMode
+                ? "bg-slate-700 border-slate-600"
+                : "bg-slate-50 border-slate-200"
+            }`}
+          />
         </div>
 
         {/* SAVE BUTTON */}
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-semibold text-lg hover:opacity-90 transition disabled:opacity-50"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-semibold text-lg"
         >
           {saving ? "Saving..." : "Save Public Profile"}
         </button>

@@ -136,6 +136,82 @@ const PublicProfile = () => {
             </div>
           </div>
 
+          {/* MENTOR DETAILS */}
+          <div>
+            <h2 className="font-semibold text-gray-700 mb-2">MENTOR DETAILS</h2>
+
+            <div className="space-y-2 text-gray-700">
+
+              <p>
+                <span className="font-semibold">Skill Level:</span>{" "}
+                {profileUser.skillLevel || "Not specified"}
+              </p>
+
+              <p>
+                <span className="font-semibold">Experience:</span>{" "}
+                {profileUser.yearsOfExperience
+                  ? `${profileUser.yearsOfExperience} years`
+                  : "Not specified"}
+              </p>
+
+              <p>
+                <span className="font-semibold">Education:</span>{" "}
+                {profileUser.education || "Not specified"}
+              </p>
+
+              <p>
+                <span className="font-semibold">Skills Offered:</span>{" "}
+                {profileUser.skillsOffered
+                  ? Array.isArray(profileUser.skillsOffered)
+                    ? profileUser.skillsOffered.join(", ")
+                    : profileUser.skillsOffered
+                  : "Not specified"}
+              </p>
+
+              <p>
+                <span className="font-semibold">Skill Tags:</span>{" "}
+                {profileUser.skillTags
+                  ? Array.isArray(profileUser.skillTags)
+                    ? profileUser.skillTags.join(", ")
+                    : profileUser.skillTags
+                  : "Not specified"}
+              </p>
+
+              <p>
+                <span className="font-semibold">LinkedIn:</span>{" "}
+                {profileUser.linkedin ? (
+                  <a
+                    href={profileUser.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-teal-600 hover:underline"
+                  >
+                    View Profile
+                  </a>
+                ) : (
+                  "Not provided"
+                )}
+              </p>
+
+              <p>
+                <span className="font-semibold">Portfolio:</span>{" "}
+                {profileUser.portfolio ? (
+                  <a
+                    href={profileUser.portfolio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-teal-600 hover:underline"
+                  >
+                    Visit Website
+                  </a>
+                ) : (
+                  "Not provided"
+                )}
+              </p>
+
+            </div>
+          </div>
+
           {/* BIO */}
           <div>
             <h2 className="font-semibold text-gray-700 mb-2">ABOUT ME</h2>
@@ -154,7 +230,10 @@ const PublicProfile = () => {
                 DEMO VIDEO
               </h2>
 
-              <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+              <div
+                className="relative w-full"
+                style={{ paddingBottom: "56.25%" }}
+              >
                 <iframe
                   src={getEmbedUrl(profileUser.demoVideo)}
                   title="demoVideo"

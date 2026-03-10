@@ -75,6 +75,30 @@ const userSchema = new mongoose.Schema({
     maxLength: 100,
     default: "",
   },
+  username: {
+  type: String,
+  unique: true,
+},
+
+skillLevel: {
+  type: String,
+  enum: ["Beginner", "Intermediate", "Advanced"],
+},
+
+yearsOfExperience: {
+  type: Number,
+},
+
+linkedin: String,
+portfolio: String,
+education: String,
+
+skillsOffered: [String],
+skillTags: [String],
+
+tagline: String,
+bio: String,
+demoVideo: String,
 
   bio: {
     type: String,
