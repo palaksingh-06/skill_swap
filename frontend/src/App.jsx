@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Skills from "./pages/Skills";
 import Messages from "./pages/Messages";
@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
+import Notifications from "./pages/Notifications";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
@@ -19,14 +20,21 @@ import EditPublicProfile from "./pages/EditPublicProfile.jsx";
 import LoginSuccess from "./pages/LoginSuccess";
 import ForgotPassword from "./pages/ForgotPassword";
 import SkillCategory from "./pages/SkillCategory";
-import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
+import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SkillMatch from "./pages/SkillMatch";
+import socket from "./socket";
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
-  const { loading } = useContext(AuthContext);
+  const { loading, user } = useContext(AuthContext); // added user
+
+  useEffect(() => {
+    if (user) {
+      socket.emit("join", user._id);
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -42,7 +50,8 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} /> 
+        <Route path="/login" element={<Login />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -57,14 +66,12 @@ const App = () => {
         <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
-         <Route path="/login-success" element={<LoginSuccess />} />
+        <Route path="/login-success" element={<LoginSuccess />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/skills/:category" element={<SkillCategory />} />
         <Route path="/profile/:id" element={<PublicProfile />} />
-      <Route path="/matches" element={<SkillMatch />} />
+        <Route path="/matches" element={<SkillMatch />} />
 
-
- 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

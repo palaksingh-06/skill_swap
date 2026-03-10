@@ -1,5 +1,6 @@
 const Session = require("../models/Session");
 const Request = require("../models/Request");
+const Notification = require("../models/Notification");
 
 // ✅ Create session FROM request
 exports.createSessionFromRequest = async (req, res) => {
@@ -29,7 +30,28 @@ exports.createSessionFromRequest = async (req, res) => {
       skill: request.skill,
     });
 
+    // 🔔 Notify both users that session was created
+
+    const notificationA = await Notification.create({
+      user: request.fromUser,
+      message: `Your learning session for ${request.skill} has been created`,
+      type: "session",
+      read: false,
+    });
+
+    const notificationB = await Notification.create({
+      user: request.toUser,
+      message: `Your learning session for ${request.skill} has been created`,
+      type: "session",
+      read: false,
+    });
+
+    // realtime socket notifications
+    global.io.to(request.fromUser.toString()).emit("notification", notificationA);
+    global.io.to(request.toUser.toString()).emit("notification", notificationB);
+
     res.json({ msg: "Session created", session });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Session creation failed" });
@@ -41,7 +63,6 @@ exports.getMySessions = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Fetch sessions where user is either user1 or user2
     const sessions = await Session.find({
       $or: [{ userA: req.user.id }, { userB: req.user.id }],
     })
@@ -55,6 +76,7 @@ exports.getMySessions = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 // ❌ Delete session
 exports.deleteSession = async (req, res) => {
   try {

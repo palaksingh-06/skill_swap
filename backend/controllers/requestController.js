@@ -1,3 +1,4 @@
+const Notification = require("../models/Notification");
 const Request = require("../models/Request");
 
 /* ------------------------------
@@ -14,6 +15,42 @@ exports.getIncomingRequests = async (req, res) => {
     res.status(500).json({ msg: "Failed to fetch requests" });
   }
 };
+
+
+/* ------------------------------
+   SEND REQUEST
+-------------------------------- */
+exports.sendRequest = async (req, res) => {
+  try {
+    const { toUser, skill, message } = req.body;
+
+    const request = await Request.create({
+      fromUser: req.user.id,
+      toUser,
+      skill,
+      message,
+      status: "pending",
+    });
+
+    // 📦 Save notification in database
+    const notification = await Notification.create({
+      user: toUser,
+      message: `${req.user.name} sent you a skill request`,
+      type: "request",
+      read: false
+    });
+
+    // 🔔 Send realtime notification
+    global.io.to(toUser).emit("notification", notification);
+
+    res.json({ msg: "Request sent", request });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Failed to send request" });
+  }
+};
+
 
 /* ------------------------------
    UPDATE REQUEST STATUS
@@ -32,26 +69,22 @@ exports.updateRequestStatus = async (req, res) => {
       { new: true }
     );
 
+    // 🔔 If accepted, notify the sender
+    if (status === "accepted") {
+
+      const notification = await Notification.create({
+        user: request.fromUser,
+        message: `${req.user.name} accepted your skill request`,
+        type: "accepted",
+        read: false
+      });
+
+      global.io.to(request.fromUser.toString()).emit("notification", notification);
+    }
+
     res.json(request);
+
   } catch (err) {
     res.status(500).json({ msg: "Failed to update request" });
-  }
-};
-exports.sendRequest = async (req, res) => {
-  try {
-    const { toUser, skill, message } = req.body;
-
-    const request = await Request.create({
-      fromUser: req.user.id,
-      toUser,
-      skill,
-      message,
-      status: "pending",
-    });
-
-    res.json({ msg: "Request sent", request });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Failed to send request" });
   }
 };
