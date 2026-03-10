@@ -198,7 +198,7 @@
 import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Skills from "./pages/Skills";
-import Messages from "./pages/Messages";
+import "@stream-io/video-react-sdk/dist/css/styles.css";
 import EditProfile from "./pages/EditProfile";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -221,6 +221,15 @@ import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SkillMatch from "./pages/SkillMatch";
 import VideoCall from "./pages/VideoCall";
+import ChatPage from "./pages/ChatPage";
+
+
+
+
+
+
+import ScheduleSession from "./pages/ScheduleSession";
+
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
@@ -240,14 +249,14 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} /> 
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<PublicProfile />} />
         <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
-        <Route path="/messages/:id" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-        <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+        <Route path="/messages/:id" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+        <Route path="/messages" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/edit-public-profile" element={<EditPublicProfile />} />
@@ -255,15 +264,26 @@ const App = () => {
         <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
-         <Route path="/login-success" element={<LoginSuccess />} />
+        <Route path="/login-success" element={<LoginSuccess />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/skills/:category" element={<SkillCategory />} />
+        <Route path="/matches" element={<SkillMatch />} />
+        <Route
+          path="/sessions/:id/schedule"
+          element={
+            <ProtectedRoute>
+              <ScheduleSession />
+            </ProtectedRoute>
+          }
+        />
+
+
         <Route path="/profile/:id" element={<PublicProfile />} />
-      <Route path="/matches" element={<SkillMatch />} />
-      <Route path="/video-call/:roomId" element={<VideoCall />} />
+        <Route path="/matches" element={<SkillMatch />} />
+        <Route path="/video-call/:roomId" element={<VideoCall />} />
 
 
- 
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

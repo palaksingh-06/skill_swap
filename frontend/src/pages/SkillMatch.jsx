@@ -174,6 +174,20 @@ const SkillMatch = () => {
   const [matches, setMatches] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [successMsg, setSuccessMsg] = useState("");
+  const openProfile = async (name) => {
+  try {
+    const res = await axios.get(
+      `/api/public/user-by-name/${encodeURIComponent(name)}`
+    );
+
+    const userId = res.data._id;
+    navigate(`/profile/${userId}`);
+  } catch (err) {
+    console.error("Profile open failed", err);
+    alert("User not found");
+  }
+};
+
 
   useEffect(() => {
     if (!user) return;
@@ -316,6 +330,15 @@ const SkillMatch = () => {
               >
                 {isSent ? "Request Sent ✓" : "Send Request"}
               </button>
+        <button
+  onClick={() => navigate(`/profile/${u._id}`)}
+  className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition"
+>
+  View Details
+</button>
+
+
+
             </div>
           );
         })}

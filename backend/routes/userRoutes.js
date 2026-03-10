@@ -170,62 +170,54 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const passport = require("../config/passport");
-
 const userController = require("../controllers/userController");
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
-
-// ==============================
-// USER ROUTES
-// ==============================
-
-// UPDATE PROFILE
-router.put("/update", auth, userController.updateProfile);
-
-
-// GET ALL USERS (protected)
-router.get(
-  "/",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    try {
-      const users = await User.find().select("_id name email");
-      res.json(users);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
-
-// GET PUBLIC PROFILE BY ID
-router.get("/public/profile/:id", userController.getPublicProfile);
-
-
-// UPDATE PUBLIC PROFILE
-router.put("/public-profile", auth, userController.updatePublicProfile);
-
-
-// UPLOAD AVATAR
-router.post(
-  "/upload-avatar",
-  auth,
-  upload.single("avatar"),
-  userController.uploadAvatar
-);
-
-
-// GET MY PROFILE
+// ─── Get my profile ───────────────────────────────────────
 router.get("/me", auth, userController.getMyProfile);
 
+// ─── Update profile (settings + skills) ──────────────────
+router.put("/update", auth, userController.updateProfile);
 
-// DASHBOARD STATS
+// ─── Update public profile ────────────────────────────────
+router.put("/public-profile", auth, userController.updatePublicProfile);
+
+// ─── Upload avatar ────────────────────────────────────────
+router.post("/upload-avatar", auth, upload.single("avatar"), userController.uploadAvatar);
+
+// ─── Dashboard stats ──────────────────────────────────────
 router.get("/stats", auth, userController.getStats);
 
+// ─── Get all skills ───────────────────────────────────────
+router.get("/skills/all", userController.getAllSkills);
 
-// GET USERS BY SKILL
+// ─── Get public profile by ID ─────────────────────────────
+router.get("/public/profile/:id", userController.getPublicProfile);
+
+// ─── Get public profile by userId ─────────────────────────
+router.get("/public-profile/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ─── Get all users ────────────────────────────────────────
+router.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
+  try {
+    const users = await User.find().select("_id name email");
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ─── Get users by skill ───────────────────────────────────
 router.get("/by-skill", async (req, res) => {
   try {
     const { skill } = req.query;
@@ -240,12 +232,7 @@ router.get("/by-skill", async (req, res) => {
   }
 });
 
-
-// GET ALL SKILLS
-router.get("/skills/all", userController.getAllSkills);
-
-
-// REMOVE SKILL
+// ─── Remove skill ─────────────────────────────────────────
 router.put("/remove-skill", auth, async (req, res) => {
   const { type, skillId } = req.body;
 
@@ -266,7 +253,6 @@ router.put("/remove-skill", auth, async (req, res) => {
     }
 
     await user.save();
-
     await user.populate("skillsTeach", "name");
     await user.populate("skillsLearn", "name");
 
@@ -277,8 +263,7 @@ router.put("/remove-skill", auth, async (req, res) => {
   }
 });
 
-
-// PUBLIC MENTOR PROFILE
+// ─── Get mentor by name ───────────────────────────────────
 router.get("/mentor/:name", auth, async (req, res) => {
   try {
     const mentor = await User.findOne({ name: req.params.name })
@@ -293,6 +278,5 @@ router.get("/mentor/:name", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 module.exports = router;

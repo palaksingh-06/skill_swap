@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import AuthProvider from "./context/AuthContext";
 import DarkModeProvider from "./context/DarkModeContext"; // correct import
+import "@stream-io/video-react-sdk/dist/css/styles.css";
 import "./index.css";
 
 // React Query setup
