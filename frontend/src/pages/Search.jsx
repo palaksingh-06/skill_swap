@@ -5,52 +5,49 @@ import { DarkModeContext } from "../context/DarkModeContext";
 
 const Search = () => {
   const { darkMode } = useContext(DarkModeContext);
-
-  const [skillsData, setSkillsData] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [hiddenMentors, setHiddenMentors] = useState([]);
+  const [skillsData, setSkillsData]     = useState([]);
+  const [search, setSearch]             = useState("");
+  const [loading, setLoading]           = useState(true);
+  const [hiddenMentors, setHiddenMentors] = useState(() => {
+    // ✅ Persist hidden mentors in localStorage
+    try {
+      return JSON.parse(localStorage.getItem("hiddenMentors")) || [];
+    } catch {
+      return [];
+    }
+  });
   const navigate = useNavigate();
-
-const openProfile = async (name) => {
-  try {
-    const res = await axios.get(
-      `/api/public/user-by-name/${encodeURIComponent(name)}`
-    );
-
-    const userId = res.data._id;
-
-    navigate(`/profile/${userId}`);
-  } catch (err) {
-    console.error("Profile open failed", err);
-    alert("User not found");
-  }
-};
-
-
-  
 
   /* ---------------- FETCH DATA ---------------- */
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/user/skills/all")
-      .then((res) => setSkillsData(res.data.skills))
-      .catch((err) => console.error("Failed to load skills", err))
-      .finally(() => setLoading(false));
-  }, []);
+  axios
+    .get("http://localhost:5000/api/user/skills/all") // keep localhost for now
+    .then((res) => {
+      console.log("API response:", res.data); // ✅ add this to see what's coming back
+      setSkillsData(res.data.skills || []); // ✅ fallback to empty array
+    })
+    .catch((err) => console.error("Failed to load skills", err))
+    .finally(() => setLoading(false));
+}, []);
 
-  /* -----------------------------------------
-     GROUP SKILLS UNDER EACH MENTOR
-  ----------------------------------------- */
-    const mentors = useMemo(() => {
+  /* ---------------- GROUP SKILLS UNDER EACH MENTOR ---------------- */
+
+  const mentors = useMemo(() => {
   const map = {};
 
+  // ✅ Guard — if skillsData is not an array, return empty
+  if (!Array.isArray(skillsData)) return [];
+
   skillsData.forEach((skill) => {
+    // ✅ Guard — if skill.mentors is missing
+    if (!Array.isArray(skill.mentors)) return;
+
     skill.mentors.forEach((mentor) => {
       if (!map[mentor.id]) {
         map[mentor.id] = {
-          id: mentor.id,
-          name: mentor.name,
+          id:     mentor.id,
+          name:   mentor.name,
+          avatar: mentor.avatar || "",
           skills: new Set(),
         };
       }
@@ -60,32 +57,40 @@ const openProfile = async (name) => {
 
   return Object.values(map)
     .map((m) => ({
-      id: m.id,
-      name: m.name,
+      id:     m.id,
+      name:   m.name,
+      avatar: m.avatar,
       skills: Array.from(m.skills),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }, [skillsData]);
-
   /* ---------------- SEARCH FILTER ---------------- */
   const filteredMentors = useMemo(() => {
-    if (!search.trim())
-  return mentors.filter(
-    (mentor) => !hiddenMentors.includes(mentor.id)
-  );
+    const visible = mentors.filter((m) => !hiddenMentors.includes(m.id));
+
+    if (!search.trim()) return visible;
 
     const query = search.toLowerCase();
-    return mentors
-  .filter((mentor) =>
-    mentor.skills.some((skill) =>
-      skill.toLowerCase().includes(query)
-    )
-  )
-  .filter((mentor) => !hiddenMentors.includes(mentor.id));
+    return visible.filter(
+      (mentor) =>
+        // ✅ search by mentor name OR skill name
+        mentor.name.toLowerCase().includes(query) ||
+        mentor.skills.some((skill) => skill.toLowerCase().includes(query))
+    );
   }, [search, mentors, hiddenMentors]);
 
+  /* ---------------- HIDE MENTOR ---------------- */
   const handleRemove = (id) => {
-  setHiddenMentors((prev) => [...prev, id]);
+    const updated = [...hiddenMentors, id];
+    setHiddenMentors(updated);
+    // ✅ persist so it survives refresh
+    localStorage.setItem("hiddenMentors", JSON.stringify(updated));
+  };
+
+  /* ---------------- RESET HIDDEN ---------------- */
+  const handleResetHidden = () => {
+    setHiddenMentors([]);
+    localStorage.removeItem("hiddenMentors");
   };
 
   if (loading) {
@@ -102,90 +107,100 @@ const openProfile = async (name) => {
         darkMode ? "bg-slate-900 text-white" : "bg-white text-gray-900"
       }`}
     >
-      {/* ---------- HERO ---------- */}
+      {/* HERO */}
       <div className="max-w-6xl mx-auto mb-14">
-        <h1
-          className={`text-5xl font-extrabold leading-tight ${
-            darkMode ? "text-white" : "text-gray-900"
-          }`}
-        >
-          Find your next <span className="text-teal-500">Mentor</span> 
+        <h1 className={`text-5xl font-extrabold leading-tight ${darkMode ? "text-white" : "text-gray-900"}`}>
+          Find your next <span className="text-teal-500">Mentor</span>
         </h1>
-
-        <p
-          className={`mt-4 max-w-xl ${
-            darkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          Connect with peers who are eager to share skills and learn together in a collaborative environment.
+        <p className={`mt-4 max-w-xl ${darkMode ? "text-slate-300" : "text-gray-600"}`}>
+          Connect with peers who are eager to share skills and learn together.
         </p>
       </div>
 
-      {/* ---------- SEARCH BAR ---------- */}
-      <div
-        className={`max-w-6xl mx-auto mb-16 rounded-full px-6 py-4 shadow-sm ${
-          darkMode ? "bg-slate-800" : "bg-gray-50"
-        }`}
-      >
+      {/* SEARCH BAR */}
+      <div className={`max-w-6xl mx-auto mb-10 rounded-full px-6 py-4 shadow-sm ${darkMode ? "bg-slate-800" : "bg-gray-50"}`}>
         <input
           type="text"
-          placeholder="What would you like to learn today?"
+          placeholder="Search by skill or mentor name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={`w-full bg-transparent outline-none text-lg ${
-            darkMode
-              ? "text-white placeholder-slate-400"
-              : "text-gray-900 placeholder-gray-400"
+            darkMode ? "text-white placeholder-slate-400" : "text-gray-900 placeholder-gray-400"
           }`}
         />
       </div>
 
-      {/* ---------- MENTOR CARDS ---------- */}
-     {filteredMentors.length === 0 ? (
-  <p
-    className={`text-center ${
-      darkMode ? "text-slate-400" : "text-gray-500"
-    }`}
-  >
-    No mentors found.
-  </p>
-) : (
-  <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      {/* RESULTS COUNT + RESET */}
+      <div className="max-w-6xl mx-auto mb-6 flex justify-between items-center">
+        <p className={`text-sm ${darkMode ? "text-slate-400" : "text-gray-500"}`}>
+          {filteredMentors.length} mentor{filteredMentors.length !== 1 ? "s" : ""} found
+        </p>
 
+        {/* ✅ Show reset button only if some mentors are hidden */}
+        {hiddenMentors.length > 0 && (
+          <button
+            onClick={handleResetHidden}
+            className="text-sm text-teal-500 hover:underline"
+          >
+            Show {hiddenMentors.length} hidden mentor{hiddenMentors.length !== 1 ? "s" : ""}
+          </button>
+        )}
+      </div>
+
+      {/* MENTOR CARDS */}
+      {filteredMentors.length === 0 ? (
+        <div className="text-center mt-20">
+          <p className="text-4xl mb-3">🔍</p>
+          <p className={darkMode ? "text-slate-400" : "text-gray-500"}>
+            No mentors found for "{search}"
+          </p>
+          <p className={`text-sm mt-1 ${darkMode ? "text-slate-500" : "text-gray-400"}`}>
+            Try a different skill or clear your search
+          </p>
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {filteredMentors.map((mentor) => (
             <div
-  key={mentor.id}
-  className={`relative rounded-3xl p-6 transition-all duration-300 ${
-    darkMode
-      ? "bg-slate-800 border border-slate-700 shadow-md hover:shadow-xl hover:-translate-y-1"
-      : "bg-white border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1"
-  }`}
->
-  <button
-    onClick={() => handleRemove(mentor.id)}
-    className="absolute top-3 right-4 text-gray-400 hover:text-red-500 text-lg font-bold"
-  >
-    ×
-  </button>
-
-
-             <h3
-  className={`text-xl font-semibold mb-3 ${
-    darkMode ? "text-white" : "text-gray-900"
-  }`}
->
-
-                {mentor.name}
-              </h3>
-
-              <p
-                className={`text-sm mb-3 ${
-                  darkMode ? "text-slate-300" : "text-gray-500"
-                }`}
+              key={mentor.id}
+              className={`relative rounded-3xl p-6 transition-all duration-300 ${
+                darkMode
+                  ? "bg-slate-800 border border-slate-700 shadow-md hover:shadow-xl hover:-translate-y-1"
+                  : "bg-white border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1"
+              }`}
+            >
+              {/* HIDE BUTTON */}
+              <button
+                onClick={() => handleRemove(mentor.id)}
+                className="absolute top-3 right-4 text-gray-400 hover:text-red-500 text-lg font-bold"
+                title="Hide this mentor"
               >
+                ×
+              </button>
+
+              {/* AVATAR + NAME */}
+              <div className="flex items-center gap-3 mb-4">
+                {mentor.avatar ? (
+                  <img
+                    src={mentor.avatar}
+                    alt={mentor.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-teal-400"
+                  />
+                ) : (
+                  // ✅ Fallback avatar with initials
+                  <div className="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    {mentor.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <h3 className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                  {mentor.name}
+                </h3>
+              </div>
+
+              {/* SKILLS */}
+              <p className={`text-sm mb-3 ${darkMode ? "text-slate-300" : "text-gray-500"}`}>
                 Teaches:
               </p>
-
               <div className="flex flex-wrap gap-2 mb-6">
                 {mentor.skills.map((skill) => (
                   <span
@@ -200,15 +215,14 @@ const openProfile = async (name) => {
                   </span>
                 ))}
               </div>
+
+              {/* VIEW PROFILE BUTTON */}
               <button
-onClick={() => navigate(`/profile/${mentor.id}`)}
-
-  className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition"
->
-  View Details
-</button>
-
-
+                onClick={() => navigate(`/profile/${mentor.id}`)}
+                className="mt-2 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition"
+              >
+                View Profile
+              </button>
             </div>
           ))}
         </div>
